@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>대학생 고민 케어 시스템</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+        .section-box { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #fff; }
+        .category-container { display: flex; gap: 15px; margin-top: 15px; }
+        .category-card { flex: 1; border: 2px solid #007bff; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; text-decoration: none; color: #007bff; font-weight: bold; }
+        .category-card:hover { background: #007bff; color: #fff; }
+        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
+        button { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>🎓 대학생 고민 케어 시스템</h2>
+        <div>
+            <strong>{{ user.username }}</strong>님 환영합니다 | 
+            <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="padding: 5px 10px; background:#6c757d;">로그아웃</button></form>
+        </div>
+        <a href="{% url 'emotion_calendar' %}" style="display: inline-block; background: #28a745; color: white; text-decoration: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; margin-bottom: 15px;">📅 나의 감정체크 달력 일기장 가기</a>
+    </div>
+
+    <div class="section-box" style="background-color: #f8f9fa; border-left: 5px solid #007bff;">
+        <h4>💡 오늘의 마음 케어 명언</h4>
+        {% if quote %}
+            <p style="font-style: italic; font-size: 1.1em; margin-bottom: 5px;">"{{ quote.content }}"</p>
+            <small style="color: #666;">- {{ quote.author }} -</small>
+        {% else %}
+            <p style="font-style: italic;">"가장 빛나는 별은 아직 태어나지 않았다."</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <a href="{% url 'emotion_calendar' %}" style="flex: 1; text-align: center; background: #28a745; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">📅 감정체크 달력 일기장</a>
+        <a href="{% url 'community_list' %}" style="flex: 1; text-align: center; background: #fd7e14; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">👥 학우 공감 커뮤니티 게시판</a>
+        <a href="{% url 'matching_chat' %}" style="flex: 1; text-align: center; background: #e83e8c; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">💬 AI 맞춤형 실시간 채팅방</a>
+    </div>
+
+    <div class="section-box">
+        <h3>✍️ 지금 어떤 고민이 있으신가요?</h3>
+        <p style="font-size: 0.9em; color: #666;">카테고리를 고르지 않아도 괜찮습니다. 마음속 이야기를 적어주시면 자체 ML 엔진이 자동으로 분석합니다.</p>
+        
+        <form action="{% url 'process_counseling' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="free">
+            <textarea name="user_answer" rows="5" placeholder="취업, 학점, 인간관계 등 지금 겪고 있는 답답한 상황을 편하게 적어주세요..." required></textarea>
+            <br><br>
+            <div style="text-align: right;">
+                <button type="submit">고민 털어놓기 (상담방 입장) 🚀</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="section-box">
+        <h3>🔍 분야별 집중 상담방</h3>
+        <p style="font-size: 0.9em; color: #666;">특정 주제를 선택하여 시스템이 제안하는 질문을 기반으로 심층 상담을 나눕니다.</p>
+        
+        <div class="category-container">
+            <a href="{% url 'category_counseling' '취업' %}" class="category-card">💼 취업 고민방</a>
+            <a href="{% url 'category_counseling' '진로' %}" class="category-card">🧭 진로/학업 고민방</a>
+            <a href="{% url 'category_counseling' '인간관계' %}" class="category-card">👥 인간관계 고민방</a>
+        </div>
+    </div>
+
+    <div class="section-box" style="border: none; padding: 0;">
+        <h3>📋 나의 지난 상담 대화 목록</h3>
+        {% if user_logs %}
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% for log in user_logs %}
+                    <a href="{% url 'counseling_detail' log.id %}" style="text-decoration: none; color: inherit;">
+                        <div style="border: 1px solid #eee; padding: 12px; border-radius: 6px; background: #fafafa;">
+                            <span style="background: #e2e3e5; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">{{ log.predicted_category }}</span>
+                            <small style="color: #999; float: right;">{{ log.created_at|date:"Y-m-d H:i" }}</small>
+                            <p style="margin: 8px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; color: #555;">
+                                Q. {{ log.chosen_question }}
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #999; font-size: 0.9em;">아직 개설된 상담방이 없습니다.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

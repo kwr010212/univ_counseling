@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>상담 대화방 상세 내역</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; background-color: #b2c7da; /* 카카오톡 메신저 기본 배경색 */ }
+        .chat-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 10px; }
+        
+        /* 💬 말풍선 공통 스타일 */
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 14px; font-size: 0.95em; line-height: 1.5; word-break: break-all; position: relative; }
+        
+        /* 왼쪽 말풍선 (시스템 및 AI 상담 교수) */
+        .bubble.left { align-self: flex-start; background-color: #ffffff; color: #000000; border-top-left-radius: 0px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 오른쪽 말풍선 (유저 본인) */
+        .bubble.right { align-self: flex-end; background-color: #fee500; color: #000000; border-top-right-radius: 0px; box-shadow: -1px 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 이름 표기 */
+        .sender-name { font-size: 0.8em; color: #444; margin-bottom: 4px; font-weight: bold; }
+        .left-box { align-self: flex-start; max-width: 80%; display: flex; flex-direction: column; }
+        .right-box { align-self: flex-end; max-width: 80%; display: flex; flex-direction: column; align-items: flex-end; }
+        
+        .ml-tag { background: #e63946; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; display: inline-block; }
+        .back-link { display: inline-block; background: rgba(0,0,0,0.5); color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
+        .back-link:hover { background: rgba(0,0,0,0.7); }
+
+        /* 📊 하단 통합 솔루션 & 고민 통계 그리드 레이아웃 */
+        .analysis-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 15px; margin-top: 25px; }
+        
+        .report-card { background: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 4px solid #2a9d8f; display: flex; flex-direction: column; justify-content: space-between; }
+        .report-title { font-size: 1.05em; font-weight: bold; color: #2a9d8f; margin-bottom: 12px; }
+        
+        .chart-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 4px solid #007bff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .chart-box h4 { margin: 0 0 15px 0; color: #333; font-size: 1em; text-align: center; }
+
+        /* 모바일 반응형 처리 */
+        @media (max-width: 768px) {
+            .analysis-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <p><a href="{% url 'counseling_home' %}" class="back-link">← 대화방 나가기 (대시보드)</a></p>
+
+    <div class="chat-container">
+        
+        <div class="left-box">
+            <div class="sender-name">🤖 시스템 안내</div>
+            <div class="bubble left">
+                {{ log.chosen_question }}
+            </div>
+        </div>
+
+        {% if restored_messages %}
+            {% for msg in restored_messages %}
+                {% if msg.sender == 'USER' %}
+                    <div class="right-box">
+                        <div class="sender-name">나 ({{ log.user.username }})</div>
+                        <div class="bubble right" style="white-space: pre-wrap;">{{ msg.text }}</div>
+                    </div>
+                {% else %}
+                    <div class="left-box">
+                        <div class="sender-name">👩‍⚕️ AI 전문 상담 교수 (대화 중)</div>
+                        <div class="bubble left" style="white-space: pre-wrap;">{{ msg.text }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="right-box">
+                <div class="sender-name">나 ({{ log.user.username }})</div>
+                <div class="bubble right" style="white-space: pre-wrap;">{{ log.user_answer }}</div>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <div style="text-align: center; margin-top: 10px; color: rgba(255,255,255,0.8); font-size: 0.8em;">
+        대화 종료 일시: {{ log.created_at|date:"Y년 m월 d일 H시 i분" }}
+    </div>
+
+    <div class="analysis-grid">
+        
+        <div class="report-card">
+            <div>
+                <div class="report-title">👩‍⚕️ AI 전문 상담 교수의 최종 종합 솔루션</div>
+                <div style="white-space: pre-wrap; line-height: 1.6; color: #333; font-size: 0.9em;">{{ log.ai_solution }}</div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <div class="ml-tag">💡 분석 주제: {{ log.predicted_category }}</div>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h4>📋 나의 누적 고민 비율 분석</h4>
+            <div style="position: relative; width: 100%; max-width: 180px; height: 180px;">
+                <canvas id="categoryPieChart"></canvas>
+            </div>
+            <p style="font-size: 0.8em; color: #666; margin-top: 15px; text-align: center; line-height: 1.4; width: 100%;">
+                현재 고민 카테고리: <strong style="color: #e63946;">[{{ current_category }}]</strong>
+            </p>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 35px; text-align: center;">
+        <p style="color: #ffffff; font-weight: bold; font-size: 0.95em; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            🌱 종합 심리 분석 및 가이드라인 매칭이 완료되었습니다.
+        </p>
+        <a href="{% url 'counseling_home' %}" style="display: inline-block; background: #6c757d; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+            ← 홈 대시보드로 돌아가기
+        </a>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                // 장고 백엔드 리스트를 안전하게 수신
+                const pieLabels = JSON.parse('{{ category_labels|safe }}');
+                const pieData = JSON.parse('{{ category_counts|safe }}');
+
+                const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+                
+                new Chart(pieCtx, {
+                    type: 'doughnut', 
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieData,
+                            backgroundColor: [
+                                '#ff6b6b', '#4ecdc4', '#ffe66d', '#1a535c', '#a8dadc', '#6d597a'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom', // 범례를 도넛 아래로 깔끔하게 배치
+                                labels: {
+                                    boxWidth: 10,
+                                    font: { size: 11, family: 'Malgun Gothic' },
+                                    padding: 10
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("상세페이지 차트 빌드 에러 로그:", error);
+            }
+        });
+    </script>
+
+</body>
+</html>

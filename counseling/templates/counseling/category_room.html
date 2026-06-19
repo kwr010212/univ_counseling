@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ category_name }} 집중 상담방</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .box { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; margin-bottom: 20px; }
+        textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
+        .btn { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h2>🧭 {{ category_name }} 심층 집중 상담방</h2>
+    <p><a href="{% url 'counseling_home' %}" style="text-decoration: none; color: #666;">← 대시보드로 돌아가기</a></p>
+    <hr>
+
+    <div class="box" style="border-top: 4px solid #007bff;">
+        <span style="background: #007bff; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">System Question</span>
+        <h3 style="margin-top: 10px; color: #333;">"{{ question.content }}"</h3>
+    </div>
+
+    <form action="{% url 'process_counseling' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        
+        <label for="user_answer"><strong>✍️ 이 질문에 대한 당신의 생각을 편하게 들려주세요:</strong></label><br><br>
+        <textarea name="user_answer" id="user_answer" rows="8" placeholder="상세하게 적어주실수록 인공지능이 더 정확하고 깊이 있는 맞춤형 솔루션을 도출해냅니다..." required></textarea>
+        <br><br>
+        <button type="submit" class="btn">자체 ML 카테고리 검증 및 상담 전송하기 🚀</button>
+    </form>
+</body>
+</html>

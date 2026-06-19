@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>고민 글쓰기</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; }
+        .back-link { display: inline-block; text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; }
+        
+        .form-box { background: white; border-radius: 12px; padding: 25px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .input-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-weight: bold; font-size: 0.95em; color: #444; }
+        
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95em; box-sizing: border-box; }
+        .form-control:focus { border-color: #007bff; outline: none; }
+        
+        .submit-btn { width: 100%; background: #2a9d8f; color: white; border: none; padding: 14px; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; }
+        .submit-btn:hover { background: #218074; }
+    </style>
+</head>
+<body>
+
+    <a href="{% url 'community_list' %}" class="back-link">← 목록으로 돌아가기</a>
+
+    <div class="form-box">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #2a9d8f;">✏️ 새로운 고민 털어놓기</h3>
+        
+        <form method="POST" action="{% url 'community_write' %}">
+            {% csrf_token %}
+            
+            <div class="input-group">
+                <label for="category">고민 카테고리</label>
+                <select id="category" name="category" class="form-control" style="background-color: #fff;" required>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="어떤 고민이 있으신가요?" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="content">내용</label>
+                <textarea id="content" name="content" class="form-control" rows="8" placeholder="다른 학우들과 나누고 싶은 이야기를 솔직하게 적어보세요." required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">등록하기</button>
+        </form>
+    </div>
+
+</body>
+</html>

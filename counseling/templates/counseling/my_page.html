@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지 & 심리 분석 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; }
+        .back-link { display: inline-block; text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; }
+        
+        .profile-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .user-name { font-size: 1.4em; font-weight: bold; margin: 0 0 10px 0; color: #222; }
+        
+        /* 📊 2개의 차트를 가로로 예쁘게 배치하는 그리드 구조 */
+        .charts-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-bottom: 25px; }
+        
+        .chart-container { background: white; border-radius: 12px; padding: 20px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .chart-title { font-size: 1.05em; font-weight: bold; color: #333; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        
+        /* 📋 하단 역사 내역 리스트 */
+        .history-section { background: white; border-radius: 12px; padding: 20px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .log-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-size: 0.95em; }
+        .log-item:last-child { border-bottom: none; }
+        .badge { background: #2a9d8f; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
+
+        /* 화면 폭이 좁아지면 차트를 위아래로 배치 */
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="{% url 'counseling_home' %}" class="back-link">← 메인 대시보드로 돌아가기</a>
+
+    <div class="profile-card">
+        <p class="user-name">👤 {{ request.user.username }}님의 마이페이지</p>
+        <p style="margin: 0; color: #666; font-size: 0.95em;">
+            교수님과 총 <strong style="color: #007bff; font-size: 1.1em;">{{ total_count }}번</strong>의 속마음 대화를 나누며 마음 건강을 든든하게 돌보고 있습니다.
+        </p>
+    </div>
+
+    <div class="charts-grid">
+        
+        <div class="chart-container">
+            <h3 class="chart-title" style="color: #007bff;">📈 최근 감정 지수 변화 추이 (최대 10회차)</h3>
+            <div style="position: relative; width:100%; height:280px;">
+                <canvas id="emotionLineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container" style="align-items: center; justify-content: space-between;">
+            <div style="width: 100%;"><h3 class="chart-title" style="color: #e63946;">🍩 나의 누적 고민 비율 통계</h3></div>
+            <div style="position: relative; width: 100%; max-width: 190px; height: 190px;">
+                <canvas id="categoryPieChart"></canvas>
+            </div>
+            <p style="font-size: 0.8em; color: #666; text-align: center; margin: 15px 0 0 0; line-height: 1.4;">
+                상담이 누적될수록 우림님의 핵심 고민 순위가 정교하게 집계됩니다.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="history-section">
+        <h3 class="chart-title" style="color: #555;">📋 최근 진행한 상담 기록 요약</h3>
+        {% if recent_logs %}
+            {% for log in recent_logs %}
+                <div class="log-item">
+                    <div>
+                        <span class="badge">{{ log.predicted_category }}</span>
+                        <span style="margin-left: 8px; color: #444;">{{ log.chosen_question|truncatechars:45 }}</span>
+                    </div>
+                    <span style="color: #888; font-size: 0.85em;">{{ log.created_at|date:"Y-m-d" }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #999; margin: 20px 0;">아직 나눈 상담 기록이 없습니다.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                // 1. 장고 컨텍스트 데이터 파싱 작업
+                const chartLabels = JSON.parse('{{ chart_dates|safe }}');
+                const dataAnxiety = JSON.parse('{{ chart_anxiety|safe }}');
+                const dataDepression = JSON.parse('{{ chart_depression|safe }}');
+                const dataUrgency = JSON.parse('{{ chart_urgency|safe }}');
+                const dataGrowth = JSON.parse('{{ chart_growth|safe }}');
+                const dataStability = JSON.parse('{{ chart_stability|safe }}');
+
+                const pieLabels = JSON.parse('{{ category_labels|safe }}');
+                const pieData = JSON.parse('{{ category_counts|safe }}');
+
+                // 2. 📈 [왼쪽] 꺾은선 차트 그리기
+                const lineCtx = document.getElementById('emotionLineChart').getContext('2d');
+                new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            { label: '🔥 불안', data: dataAnxiety, borderColor: '#e63946', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 },
+                            { label: '😭 우울', data: dataDepression, borderColor: '#9b5de5', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 },
+                            { label: '⏱️ 조급', data: dataUrgency, borderColor: '#f15bb5', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 },
+                            { label: '✨ 성장', data: dataGrowth, borderColor: '#00f5d4', backgroundColor: 'transparent', borderWidth: 2.5, tension: 0.2 },
+                            { label: '🍀 안정', data: dataStability, borderColor: '#00bbf9', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, title: { display: true, text: '점수' } }
+                        },
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+                    }
+                });
+
+                // 3. 🍩 [오른쪽] 도넛 차트 그리기
+                const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieData,
+                            backgroundColor: ['#4ea8de', '#ff6b6b', '#ffd166', '#06d6a0', '#118ab2', '#073b4c'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, font: { size: 11, family: 'Malgun Gothic' }, padding: 8 }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("마이페이지 차트 종합 렌더링 에러:", err);
+            }
+        });
+    </script>
+
+</body>
+</html>

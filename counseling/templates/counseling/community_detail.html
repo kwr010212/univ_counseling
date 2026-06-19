@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ post.title }}</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f4f6f9; }
+        .post-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .post-header { border-bottom: 1px solid #edf2f7; padding-bottom: 12px; margin-bottom: 15px; }
+        .post-content { font-size: 1.1em; line-height: 1.7; color: #2d3748; min-height: 150px; white-space: pre-wrap; }
+        
+        /* 댓글 컴포넌트 */
+        .comment-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .comment-item { border-bottom: 1px solid #f7fafc; padding: 10px 0; font-size: 0.95em; }
+        .comment-meta { font-size: 0.8em; color: #a0aec0; margin-bottom: 4px; }
+        
+        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e0; resize: none; margin-bottom: 10px; }
+        .submit-btn { background: #fd7e14; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .back-link { display: inline-block; margin-bottom: 15px; color: #4a5568; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <a href="{% url 'community_list' %}" class="back-link">← 목록으로 돌아가기</a>
+
+    <div class="post-card">
+        <div class="post-header">
+            <span style="background: #edf2f7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">{{ post.category }}</span>
+            <h2 style="margin: 10px 0 5px 0;">{{ post.title }}</h2>
+            <div style="font-size: 0.85em; color: #a0aec0;">작성자: 익명 학우 | {{ post.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+        <div class="post-content">{{ post.content }}</div>
+    </div>
+
+    <div class="comment-section">
+        <h3>💬 댓글 ({{ post.comments.count }})</h3>
+        <div style="margin-bottom: 20px;">
+            {% for comment in post.comments.all %}
+            <div class="comment-item">
+                <div class="comment-meta">익명 학우 | {{ comment.created_at|date:"m-d H:i" }}</div>
+                <div style="color: #4a5568;">{{ comment.content }}</div>
+            </div>
+            {% empty %}
+            <div style="color: #a0aec0; text-align: center; padding: 15px;">아직 댓글이 없습니다. 따뜻한 한마디를 건네보세요.</div>
+            {% endfor %}
+        </div>
+
+        <form action="{% url 'community_comment' post.id %}" method="POST">
+            {% csrf_token %}
+            <textarea name="content" rows="3" placeholder="타인을 비방하거나 상처를 주는 댓글은 삼가해 주세요." required></textarea>
+            <div style="text-align: right;">
+                <button type="submit" class="submit-btn">댓글 등록</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

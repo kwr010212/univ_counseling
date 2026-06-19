@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나의 감정체크 달력 일기장</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; }
+        .back-link { display: inline-block; text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; }
+        .calendar-title { text-align: center; color: #222; margin-bottom: 5px; }
+        .calendar-subtitle { text-align: center; color: #666; font-size: 0.9em; margin-bottom: 25px; }
+        
+        /* 📅 달력 그리드 구조 */
+        .calendar-container { background: white; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        
+        /* 📆 달력 날짜 한 칸 스타일 */
+        .day-box { 
+            min-height: 85px; 
+            border: 1px solid #e9ecef; 
+            border-radius: 6px; 
+            padding: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: flex-start;
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            background: #fff; 
+        }
+        .day-box:hover { border-color: #007bff; background: #f1f7ff; transform: translateY(-1px); }
+        .day-number { font-size: 0.95em; font-weight: bold; color: #555; display: block; margin-bottom: 8px; }
+        .day-emojis { font-size: 1.2em; width: 100%; text-align: center; margin-top: auto; padding-bottom: 5px; }
+        
+        /* 주말 및 타 월 색상 제어 */
+        .sun { color: #e63946; }
+        .sat { color: #007bff; }
+        .other-month { background: #f8f9fa; color: #ccc; cursor: not-allowed; }
+        
+        /* 📋 하단 상담 히스토리 목록 구역 */
+        .detail-section { margin-top: 25px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #ddd; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .section-title { font-size: 1.1em; font-weight: bold; color: #007bff; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        
+        .log-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 12px 16px; border-radius: 8px; background: #fafafa; margin-bottom: 10px; text-decoration: none; color: inherit; transition: all 0.2s; }
+        .log-card:hover { background: #f1f7ff; border-color: #007bff; }
+        .log-meta { display: flex; align-items: center; gap: 8px; }
+        .badge { background: #e2e3e5; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+        .log-title { font-size: 0.95em; color: #444; margin: 8px 0 0 0; }
+    </style>
+</head>
+<body>
+
+    <a href="{% url 'counseling_home' %}" class="back-link">← 메인 대시보드로 돌아가기</a>
+
+    <h1 class="calendar-title">📅 나의 감정체크 달력 일기장</h1>
+    
+    <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 20px; border: 1px solid #e9ecef; text-align: center; font-size: 0.9em; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+        <span style="margin: 0 8px;">🔥 불안/스트레스</span> | 
+        <span style="margin: 0 8px;">😭 우울/무기력</span> | 
+        <span style="margin: 0 8px;">⏱️ 조급/마감압박</span> | 
+        <span style="margin: 0 8px;">✨ 성장의지/성취</span> | 
+        <span style="margin: 0 8px;">🍀 마음안정/평온</span> |
+        <span style="margin: 0 8px;">😊 잔잔한 일상</span>
+    </div>
+    
+    <p class="calendar-subtitle">날짜를 클릭하면 그날 AI 교수님과 나눈 심층 상담 히스토리를 다시 복원할 수 있습니다.</p>
+    
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="day-box other-month"><span class="day-number">31</span></div>
+        </div>
+    </div>
+
+    <div class="detail-section" id="detail-section">
+        <h3 class="section-title" id="selected-date-title">📋 상담 히스토리 원본</h3>
+        <div id="logs-list-container">
+            </div>
+    </div>
+
+    <div id="django-data-holder" style="display: none;">
+        {% if calendar_data %}
+            {% for date_key, value in calendar_data.items %}
+                <div class="backend-date-item" data-date="{{ date_key }}">
+                    <div class="backend-emojis">{% for emo in value.emojis %}{{ emo }},{% endfor %}</div>
+                    <div class="backend-logs-container">
+                        {% for log in value.logs %}
+                            <div class="backend-log" 
+                                 data-id="{{ log.id }}" 
+                                 data-title="{{ log.title }}" 
+                                 data-category="{{ log.category }}" 
+                                 data-time="{{ log.time }}" 
+                                 data-emoji="{{ log.main_emoji }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script>
+        const emoData = {};
+        
+        // HTML에 안전하게 심어둔 장고 데이터를 순수 JS 문법으로 파싱하여 변환
+        const dateItems = document.querySelectorAll('.backend-date-item');
+        dateItems.forEach(function(item) {
+            const dateKey = item.getAttribute('data-date');
+            const emojiText = item.querySelector('.backend-emojis').innerText;
+            const emojiArray = emojiText.split(',').filter(function(e) { return e.trim() !== ''; });
+            
+            const logElements = item.querySelectorAll('.backend-log');
+            const logsArray = [];
+            
+            logElements.forEach(function(le) {
+                logsArray.push({
+                    id: le.getAttribute('data-id'),
+                    title: le.getAttribute('data-title'),
+                    category: le.getAttribute('data-category'),
+                    time: le.getAttribute('data-time'),
+                    emoji: le.getAttribute('data-emoji')
+                });
+            });
+            
+            emoData[dateKey] = {
+                emojis: emojiArray,
+                logs: logsArray
+            };
+        });
+
+        // 6월 달력 그리드를 동적으로 안전하게 그리는 코드
+        const gridContainer = document.querySelector('.calendar-grid');
+        
+        for(let d = 1; d <= 30; d++) {
+            const dayStr = d < 10 ? '0' + d : d;
+            const fullDate = `2026-06-${dayStr}`;
+            
+            const dayOfWeek = (d + 0) % 7; 
+            let dayClass = "";
+            if(dayOfWeek === 6) dayClass = "sun"; 
+            if(dayOfWeek === 5) dayClass = "sat"; 
+
+            let emojiHtml = "";
+            if(emoData[fullDate] && emoData[fullDate].emojis) {
+                emojiHtml = emoData[fullDate].emojis.join(" ");
+            }
+
+            const dayBox = document.createElement('div');
+            dayBox.className = 'day-box';
+            dayBox.addEventListener('click', function() {
+                showDayLogs(fullDate);
+            });
+            
+            dayBox.innerHTML = `
+                <span class="day-number ${dayClass}">${d}</span>
+                <div class="day-emojis">${emojiHtml}</div>
+            `;
+            gridContainer.appendChild(dayBox);
+        }
+
+        // 날짜 클릭 인터랙션 제어 함수
+        function showDayLogs(dateStr) {
+            const section = document.getElementById('detail-section');
+            const title = document.getElementById('selected-date-title');
+            const container = document.getElementById('logs-list-container');
+            
+            title.innerText = `📋 ${dateStr} 상담 히스토리 원본`;
+            container.innerHTML = ""; 
+            
+            if(emoData[dateStr] && emoData[dateStr].logs && emoData[dateStr].logs.length > 0) {
+                section.style.display = 'block';
+                
+                emoData[dateStr].logs.forEach(function(log) {
+                    const card = document.createElement('a');
+                    card.className = 'log-card';
+                    card.href = '/counseling/detail/' + log.id + '/'; 
+                    
+                    card.innerHTML = `
+                        <div>
+                            <div class="log-meta">
+                                <span class="badge" style="background: #007bff; color: white;">${log.category}</span>
+                                <span style="font-size: 0.85em; color: #888;">⏱️ ${log.time} 상담</span>
+                            </div>
+                            <p class="log-title">${log.emoji} Q. ${log.title}</p>
+                        </div>
+                        <div style="color: #007bff; font-weight: bold; font-size: 0.9em;">대화록 열기 →</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                section.style.display = 'block';
+                container.innerHTML = '<p style="text-align: center; color: #999; margin: 20px 0; font-size: 0.9em;">이날 진행된 심층 상담 내역이 없습니다. 대시보드에서 교수님과 대화를 시작해 보세요!</p>';
+            }
+            
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+
+</body>
+</html>

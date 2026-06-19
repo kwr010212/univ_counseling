@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>대학생 고민 케어 홈</title>
+</head>
+<body>
+    <h2>대학생 고민 케어 시스템 메인 홈</h2>
+    {% if user.is_authenticated %}
+        <p>환영합니다, <strong>{{ user.username }}</strong>님!</p>
+        <form action="{% url 'logout' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit">로그아웃</button>
+        </form>
+    {% else %}
+        <p>로그인이 필요한 서비스입니다.</p>
+        <a href="{% url 'login' %}">로그인 하러가기</a>
+    {% endif %}
+</body>
+</html>

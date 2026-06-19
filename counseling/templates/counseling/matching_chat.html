@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 맞춤형 오픈 채팅방</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; display: flex; flex-direction: column; height: 95vh; box-sizing: border-box; }
+        .chat-container { width: 100%; max-width: 600px; margin: 0 auto; background: #b2c7da; /* 카카오톡 느낌 배경색 */ border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        .chat-header { background: #343a40; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 채팅 메시지 스크롤 영역 */
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg-box { max-width: 75%; padding: 10px 14px; border-radius: 8px; font-size: 0.95em; line-height: 1.4; position: relative; }
+        
+        /* 상대방 메시지 (왼쪽) */
+        .msg-other { background: white; align-self: flex-start; border-top-left-radius: 0; }
+        .msg-user-name { font-size: 0.75em; color: #555; margin-bottom: 2px; font-weight: bold; }
+        
+        /* 내가 보낸 메시지 (오른쪽) */
+        .msg-me { background: #ffeb33; align-self: flex-end; border-top-right-radius: 0; }
+        .msg-time { font-size: 0.7em; color: #777; align-self: flex-end; margin: 0 5px; }
+
+        /* 하단 입력 바 */
+        .chat-input-area { background: white; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #cbd5e0; }
+        .chat-input { flex: 1; border: 1px solid #cbd5e0; border-radius: 6px; padding: 10px; font-size: 1em; outline: none; }
+        .send-btn { background: #ffeb33; border: none; padding: 0 20px; font-weight: bold; border-radius: 6px; cursor: pointer; color: #3c3c3c; }
+        .back-btn { background: #6c757d; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div>
+                <span style="font-size: 1.2em; font-weight: bold;">🔊 [{{ room_name }}] 공감 오픈채팅방</span>
+                <span style="font-size: 0.8em; opacity: 0.8; margin-left: 5px;">• 실시간 익명 매칭</span>
+            </div>
+            <a href="{% url 'counseling_home' %}" class="back-btn">나가기</a>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div style="text-align: center; color: #555; font-size: 0.85em; margin: 10px 0;">
+                🔒 AI 분석 결과 고민 관심사가 동일한 학우들끼리 자동 연결된 안전한 방입니다.
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="messageInput" class="chat-input" placeholder="서로를 응원하는 따뜻한 메시지를 남겨보세요..." onkeypress="if(event.keyCode==13) sendMessage()">
+            <button class="send-btn" onclick="sendMessage()">전송</button>
+        </div>
+    </div>
+
+    <script>
+        const roomName = "{{ room_name }}";
+        const currentUser = "{{ request.user.username }}";
+        const chatZone = document.getElementById('chatMessages');
+
+        // 서버에서 메시지 가져오는 롱폴링 엔진 함수
+        function loadMessages() {
+            fetch(`/counseling/community/chat/api/?room=${roomName}`)
+                .then(res => res.json())
+                .then(data => {
+                    // 스크롤이 맨 밑에 있는지 체크
+                    const isAtBottom = chatZone.scrollHeight - chatZone.clientHeight <= chatZone.scrollTop + 50;
+                    
+                    // 기존 메시지 초기화 후 재구성
+                    // 안내 문구는 유지
+                    chatZone.innerHTML = '<div style="text-align: center; color: #555; font-size: 0.85em; margin: 10px 0;">🔒 AI 분석 결과 고민 관심사가 동일한 학우들끼리 자동 연결된 안전한 방입니다.</div>';
+                    
+                    data.messages.forEach(msg => {
+                        const msgWrapper = document.createElement('div');
+                        msgWrapper.style.display = 'flex';
+                        msgWrapper.style.flexDirection = 'column';
+                        
+                        if (msg.user === currentUser) {
+                            // 내가 보낸 메시지 레이아웃 구조
+                            msgWrapper.innerHTML = `
+                                <div style="display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 8px;">
+                                    <span class="msg-time">${msg.time}</span>
+                                    <div class="msg-box msg-me">${msg.text}</div>
+                                </div>
+                            `;
+                        } else {
+                            // 타인이 보낸 메시지 레이아웃 구조
+                            msgWrapper.innerHTML = `
+                                <div class="msg-user-name" style="margin-left: 5px;">익명(${msg.user.substring(0,2)}*)</div>
+                                <div style="display: flex; justify-content: flex-start; align-items: flex-end; margin-bottom: 8px;">
+                                    <div class="msg-box msg-other">${msg.text}</div>
+                                    <span class="msg-time">${msg.time}</span>
+                                </div>
+                            `;
+                        }
+                        chatZone.appendChild(msgWrapper);
+                    });
+                    
+                    // 새 메시지가 왔을 때 스크롤 포커스 자동 하단 제어
+                    if (isAtBottom) {
+                        chatZone.scrollTop = chatZone.scrollHeight;
+                    }
+                });
+        }
+
+        // 메시지 서버로 전송하는 함수
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            fetch(`/counseling/community/chat/api/?room=${roomName}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ text: text })
+            }).then(() => {
+                input.value = '';
+                loadMessages(); // 전송 즉시 갱신
+            });
+        }
+
+        // 💡 1초(1000ms)마다 백엔드 동기화 파이프라인 구동 (실시간 시연 완벽 보장)
+        setInterval(loadMessages, 1000);
+        // 첫 페이지 로드 시 가동
+        loadMessages();
+    </script>
+</body>
+</html>

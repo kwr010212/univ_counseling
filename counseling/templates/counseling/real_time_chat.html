@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>실시간 고민 소모임 - 마음 대피소</title>
+    <style>
+        /* 🎨 수직(세로) 정렬 흐름 및 콤팩트 레이아웃 비율 유지 */
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; position: relative; }
+        .back-link { display: inline-block; text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 15px; }
+        
+        /* 🔄 로딩/매칭 애니메이션 화면 */
+        .matching-box { background: white; border-radius: 12px; padding: 40px 20px; text-align: center; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: #4f46e5; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 💬 실시간 채팅창 컨테이너 */
+        .chat-container { display: none; background: white; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .chat-header { background: #4f46e5; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .room-badge { background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 4px; font-size: 0.85em; }
+        
+        /* 👥 접속자 명단 보기 버튼 스타일 */
+        .users-toggle-btn { background: rgba(255, 255, 255, 0.25); border: none; color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: background 0.2s; }
+        .users-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+        /* 👥 우측 레이어 접속자 리스트 사이드바 */
+        .user-sidebar { position: absolute; top: 52px; right: -200px; width: 180px; height: 350px; background: #ffffff; border-left: 1px solid #ddd; box-shadow: -4px 4px 10px rgba(0,0,0,0.05); z-index: 10; transition: right 0.3s ease; display: flex; flex-direction: column; }
+        .sidebar-header { background: #f1f5f9; padding: 10px 15px; font-size: 0.85em; font-weight: bold; color: #475569; border-bottom: 1px solid #e2e8f0; }
+        .user-list-feed { list-style: none; margin: 0; padding: 10px; overflow-y: auto; font-size: 0.9em; display: flex; flex-direction: column; gap: 8px; }
+        .user-list-item { display: flex; align-items: center; gap: 6px; color: #334155; padding: 4px 6px; border-radius: 4px; }
+        .user-list-item.me { background: #f0fdf4; color: #166534; font-weight: bold; }
+        .status-dot { width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; }
+
+        /* 📜 메시지 대화 피드 */
+        .chat-messages { height: 350px; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; }
+        .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; align-items: flex-start; }
+        
+        .msg-meta { font-size: 0.75em; color: #888; margin-bottom: 3px; }
+        .msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 0.92em; line-height: 1.4; word-break: break-all; }
+        .me .msg-bubble { background: #4f46e5; color: white; border-top-right-radius: 0; }
+        .other .msg-bubble { background: #e2e8f0; color: #333; border-top-left-radius: 0; }
+        
+        .system-msg { align-self: center; background: #e2e8f0; color: #64748b; font-size: 0.8em; padding: 4px 12px; border-radius: 12px; margin: 5px 0; }
+
+        /* ⌨️ 하단 입력구 구역 */
+        .chat-input-form { display: flex; border-top: 1px solid #eee; background: white; position: relative; z-index: 11; }
+        .chat-input { flex: 1; padding: 15px; border: none; font-size: 0.92em; }
+        .chat-input:focus { outline: none; }
+        .chat-send-btn { background: #4f46e5; color: white; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .chat-send-btn:hover { background: #3b32c7; }
+    </style>
+</head>
+<body>
+
+    <a href="{% url 'community_list' %}" class="back-link">← 마음 대피소로 나가기</a>
+
+    <div class="matching-box" id="matchingBox">
+        <div class="spinner"></div>
+        <h3 style="margin: 0 0 10px 0; color: #4f46e5;">🤝 고민 메이트 매칭 중...</h3>
+        <p style="font-size: 0.9em; color: #666; margin: 0; line-height: 1.5;">
+            <strong>{{ request.user.username }}</strong>님의 최근 고민 분야인 <strong style="color: #e63946;">[{{ user_category }}]</strong> 카테고리에서<br>
+            속마음을 함께 나눌 학우들을 실시간 연동하고 있습니다.
+        </p>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <span class="room-badge" id="roomName">🌱 {{ user_category }} 소모임방</span>
+            <button class="users-toggle-btn" id="sidebarToggleBtn">👥 참여자 (<span id="userCount">0</span>)</button>
+        </div>
+        
+        <div class="user-sidebar" id="userSidebar">
+            <div class="sidebar-header">🟢 현재 접속 중인 학우</div>
+            <ul class="user-list-feed" id="userListFeed">
+                </ul>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="system-msg">🤫 전원 익명으로 안전하게 진행되는 소모임 공간입니다.</div>
+        </div>
+        
+        <form class="chat-input-form" id="chatForm">
+            {% csrf_token %}
+            <input type="text" id="messageInput" class="chat-input" placeholder="따뜻한 위로와 이야기를 건네보세요..." autocomplete="off" required>
+            <button type="submit" class="chat-send-btn">전송</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const userCategory = "{{ user_category }}";
+            const currentUsername = "{{ request.user.username }}";
+            let lastMessageCount = -1;
+            
+            setTimeout(() => {
+                document.getElementById('matchingBox').style.display = 'none';
+                document.getElementById('chatContainer').style.display = 'block';
+                
+                fetchChatMessages();
+                fetchRoomUsers();
+                
+                setInterval(fetchChatMessages, 1000);
+                setInterval(fetchRoomUsers, 1000);
+            }, 1500);
+
+            const chatForm = document.getElementById('chatForm');
+            const messageInput = document.getElementById('messageInput');
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // ✉️ 1. 대화 메시지 전송
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (!message) return;
+
+                // 장고 url 태그를 활용해 꼬임 방지
+                fetch("{% url 'chat_api' %}?room=" + encodeURIComponent(userCategory), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ text: message })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        messageInput.value = '';
+                        fetchChatMessages();
+                    }
+                });
+            });
+
+            // ✉️ 2. 실시간 메시지 수신
+            function fetchChatMessages() {
+                fetch("{% url 'chat_api' %}?room=" + encodeURIComponent(userCategory))
+                .then(res => res.json())
+                .then(data => {
+                    const messages = data.messages || [];
+                    if (messages.length !== lastMessageCount) {
+                        lastMessageCount = messages.length;
+                        renderMessages(messages);
+                    }
+                });
+            }
+
+            function renderMessages(messages) {
+                const msgFeed = document.getElementById('chatMessages');
+                msgFeed.innerHTML = '<div class="system-msg">🤫 전원 익명으로 안전하게 진행되는 소모임 공간입니다.</div>';
+                
+                messages.forEach(msg => {
+                    const wrapper = document.createElement('div');
+                    if (msg.user === currentUsername) {
+                        wrapper.className = 'msg-wrapper me';
+                        wrapper.innerHTML = `
+                            <div class="msg-meta">나</div>
+                            <div class="msg-bubble">${msg.text}</div>
+                        `;
+                    } else {
+                        wrapper.className = 'msg-wrapper other';
+                        wrapper.innerHTML = `
+                            <div class="msg-meta">익명 학우</div>
+                            <div class="msg-bubble">${msg.text}</div>
+                        `;
+                    }
+                    msgFeed.appendChild(wrapper);
+                });
+                msgFeed.scrollTop = msgFeed.scrollHeight;
+            }
+
+            // 👥 3. 실시간 참여자 및 카운트 동기화 (오류 해결 핵심)
+            function fetchRoomUsers() {
+                fetch("{% url 'room_users_api' %}?room=" + encodeURIComponent(userCategory))
+                .then(res => res.json())
+                .then(data => {
+                    const users = data.users || [];
+                    const count = data.count !== undefined ? data.count : users.length;
+                    
+                    // 상단 카운트 변경 적용
+                    document.getElementById('userCount').innerText = count;
+                    
+                    // 사이드바 명단 동적 생성
+                    const listFeed = document.getElementById('userListFeed');
+                    listFeed.innerHTML = '';
+                    
+                    let anonymousIndex = 1;
+                    users.forEach(user => {
+                        const li = document.createElement('li');
+                        if (user === currentUsername) {
+                            li.className = 'user-list-item me';
+                            li.innerHTML = `<span class="status-dot"></span>나 (익명 학우)`;
+                        } else {
+                            li.className = 'user-list-item';
+                            li.innerHTML = `<span class="status-dot"></span>익명 학우 ${anonymousIndex}`;
+                            anonymousIndex++;
+                        }
+                        listFeed.appendChild(li);
+                    });
+                })
+                .catch(err => console.error("참여자 데이터 동기화 에러:", err));
+            }
+
+            // 사이드바 토글
+            const sidebar = document.getElementById('userSidebar');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', function() {
+                    if (sidebar.style.right === '0px') {
+                        sidebar.style.right = '-200px';
+                    } else {
+                        sidebar.style.right = '0px';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
