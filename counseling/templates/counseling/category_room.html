@@ -2,33 +2,142 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>{{ category_name }} 집중 상담방</title>
+    <viewport content="width=device-width, initial-scale=1.0">
+    <title>univ counseling - {{ category_name }} 심층 상담</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .box { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; margin-bottom: 20px; }
-        textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
-        .btn { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-        .btn:hover { background: #0056b3; }
+        /* 🎨 [글로벌 기본 스타일] 포근하고 몰입감 있는 레이아웃 가이드 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            max-width: 650px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+            background-color: #f0f2f5; 
+            color: #334155; 
+            line-height: 1.6;
+        }
+
+        /* 🏠 [상단 네비게이션 헤더 바] 타이틀 및 이전 홈 이동 링크 */
+        .room-header {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+        .room-header h2 { margin: 0 0 6px 0; font-size: 1.3em; color: #1e293b; font-weight: 700; }
+        .back-link { 
+            font-size: 0.88em; 
+            color: #64748b; 
+            text-decoration: none; 
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #4f46e5; }
+
+        /* 🔮 [시스템 핵심 질문 카드] 사용자가 집중해야 할 밸런싱 질문 영역 */
+        .question-card { 
+            background: white; 
+            padding: 24px; 
+            margin-bottom: 24px; 
+            border-radius: 16px; 
+            border: 1px solid #e5e7eb; 
+            border-top: 4px solid #818cf8; /* 파스텔 인디고 블루 포인트 */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
+        }
+        
+        /* 🏷️ 시스템 질문 안내 전용 네임칩 배지 */
+        .system-badge { 
+            background: #e0e7ff; 
+            color: #4f46e5; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 0.8em; 
+            font-weight: 700; 
+            display: inline-block;
+            letter-spacing: 0.3px;
+        }
+        .question-text { 
+            margin-top: 14px; 
+            margin-bottom: 0;
+            color: #4f46e5; 
+            font-size: 1.15em;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* ✍️ [자율 답변 입력 폼 구역 서식] */
+        .form-label {
+            font-size: 0.92em;
+            color: #475569;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        textarea { 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: 1px solid #e5e7eb; 
+            background: #ffffff;
+            font-size: 0.95em;
+            color: #334155;
+            resize: none; 
+            transition: all 0.2s;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+        textarea:focus { 
+            outline: none; 
+            border-color: #818cf8; 
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15); 
+        }
+        
+        /* 🚀 [제출 액션 버튼] 와이드 형태의 전송 전용 버튼 스타일 */
+        .submit-btn { 
+            background: #818cf8; 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.95em;
+            width: 100%;
+            margin-top: 16px;
+            box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.2);
+            transition: all 0.2s; 
+        }
+        .submit-btn:hover { background: #6366f1; }
+        .submit-btn:active { transform: scale(0.99); }
     </style>
 </head>
 <body>
-    <h2>🧭 {{ category_name }} 심층 집중 상담방</h2>
-    <p><a href="{% url 'counseling_home' %}" style="text-decoration: none; color: #666;">← 대시보드로 돌아가기</a></p>
-    <hr>
 
-    <div class="box" style="border-top: 4px solid #007bff;">
-        <span style="background: #007bff; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">System Question</span>
-        <h3 style="margin-top: 10px; color: #333;">"{{ question.content }}"</h3>
+    <!-- 🏠 [구역 1: 상단 헤더 영역] 카테고리 정보 및 대시보드 탈출 경로 -->
+    <div class="room-header">
+        <h2>🧭 {{ category_name }} 심층 집중 상담방</h2>
+        <a href="{% url 'counseling_home' %}" class="back-link">← 대화방 나가기 (홈 대시보드)</a>
     </div>
 
+    <!-- 🔮 [구역 2: 매칭 질문 영역] 백엔드에서 내려준 타겟 핵심 질문 노출 구간 -->
+    <div class="question-card">
+        <span class="system-badge">System 밸런싱 질문</span>
+        <h3 class="question-text">"{{ question.content }}"</h3>
+    </div>
+
+    <!-- ✍️ [구역 3: 답변 작성 및 전송 폼] 자체 ML 분석기로 라우팅되는 폼 구간 -->
     <form action="{% url 'process_counseling' %}" method="POST">
         {% csrf_token %}
+        <!-- 백엔드 매핑용 질문 ID 히든 데이터 전달 파트 -->
         <input type="hidden" name="question_id" value="{{ question.id }}">
         
-        <label for="user_answer"><strong>✍️ 이 질문에 대한 당신의 생각을 편하게 들려주세요:</strong></label><br><br>
+        <label for="user_answer" class="form-label">✍️ 이 질문에 대한 당신의 생각을 편하게 들려주세요:</label>
         <textarea name="user_answer" id="user_answer" rows="8" placeholder="상세하게 적어주실수록 인공지능이 더 정확하고 깊이 있는 맞춤형 솔루션을 도출해냅니다..." required></textarea>
-        <br><br>
-        <button type="submit" class="btn">자체 ML 카테고리 검증 및 상담 전송하기 🚀</button>
+        
+        <!-- 분석 서버 연동 액션 버튼 파트 -->
+        <button type="submit" class="submit-btn">자체 ML 카테고리 검증 및 상담 전송하기 🚀</button>
     </form>
+
 </body>
 </html>

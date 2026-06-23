@@ -2,85 +2,195 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>나의 감정체크 달력 일기장</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>univ counseling - 나의 감정체크 달력 일기장</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; }
-        .back-link { display: inline-block; text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; }
-        .calendar-title { text-align: center; color: #222; margin-bottom: 5px; }
-        .calendar-subtitle { text-align: center; color: #666; font-size: 0.9em; margin-bottom: 25px; }
+        /* 🎨 [글로벌 기본 스타일] 파스텔 라벤더 블루 테마 연동 가이드 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            max-width: 740px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+            background-color: #f0f2f5; 
+            color: #334155; 
+            line-height: 1.6;
+        }
+
+        /* ⬅️ [상단 네비게이션] 홈 대시보드 복귀 링크 */
+        .back-link-box { margin-bottom: 16px; }
+        .back-link { 
+            display: inline-block; 
+            background: #94a3b8; 
+            color: white; 
+            text-decoration: none; 
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            font-size: 0.88em; 
+            font-weight: 600; 
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .back-link:hover { background: #64748b; }
         
-        /* 📅 달력 그리드 구조 */
-        .calendar-container { background: white; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-title { text-align: center; color: #1e293b; font-size: 1.6em; font-weight: 700; margin-top: 10px; margin-bottom: 6px; }
+        .calendar-subtitle { text-align: center; color: #64748b; font-size: 0.88em; margin-top: 0; margin-bottom: 24px; font-weight: 500; }
         
-        /* 📆 달력 날짜 한 칸 스타일 */
+        /* 🏷️ [감정 지표 인덱스 바] 파스텔 색상 칩 그룹 디자인 */
+        .emotion-legend-bar { 
+            background: white; 
+            border-radius: 14px; 
+            padding: 12px; 
+            margin-bottom: 24px; 
+            border: 1px solid #e5e7eb; 
+            display: flex; 
+            justify-content: center; 
+            gap: 6px; 
+            flex-wrap: wrap; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+        .legend-chip { 
+            font-size: 0.82em; 
+            font-weight: 600; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            background: #f8fafc; 
+            border: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        /* 📅 [중단 달력 메인 컨테이너 구조] */
+        .calendar-container { 
+            background: white; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 16px; 
+            padding: 24px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+        }
+        .calendar-header { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            text-align: center; 
+            font-weight: 700; 
+            font-size: 0.9em;
+            color: #64748b;
+            border-bottom: 1px solid #f1f5f9; 
+            padding-bottom: 12px; 
+            margin-bottom: 14px; 
+        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        
+        /* 📆 [달력 날짜 한 칸 스타일 가이드] 소형 피드형 반응 박스 */
         .day-box { 
-            min-height: 85px; 
-            border: 1px solid #e9ecef; 
-            border-radius: 6px; 
-            padding: 8px; 
+            min-height: 90px; 
+            border: 1px solid #f1f5f9; 
+            border-radius: 10px; 
+            padding: 10px; 
             display: flex; 
             flex-direction: column; 
             justify-content: flex-start; 
             align-items: flex-start;
             cursor: pointer; 
-            transition: all 0.2s ease; 
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); 
             background: #fff; 
         }
-        .day-box:hover { border-color: #007bff; background: #f1f7ff; transform: translateY(-1px); }
-        .day-number { font-size: 0.95em; font-weight: bold; color: #555; display: block; margin-bottom: 8px; }
-        .day-emojis { font-size: 1.2em; width: 100%; text-align: center; margin-top: auto; padding-bottom: 5px; }
+        .day-box:hover { 
+            border-color: #818cf8; 
+            background: #f5f7ff; 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(129, 140, 248, 0.12);
+        }
+        .day-number { font-size: 0.9em; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px; }
+        .day-emojis { font-size: 1.25em; width: 100%; text-align: center; margin-top: auto; padding-bottom: 2px; letter-spacing: 1px; }
         
-        /* 주말 및 타 월 색상 제어 */
-        .sun { color: #e63946; }
-        .sat { color: #007bff; }
-        .other-month { background: #f8f9fa; color: #ccc; cursor: not-allowed; }
+        /* 주말 및 이전/다음 달 음영 브랜딩 데코 */
+        .sun { color: #f87171; }
+        .sat { color: #60a5fa; }
+        .other-month { background: #f8fafc; color: #cbd5e1; cursor: not-allowed; border-color: #f1f5f9; }
+        .other-month:hover { transform: none; box-shadow: none; background: #f8fafc; border-color: #f1f5f9; }
         
-        /* 📋 하단 상담 히스토리 목록 구역 */
-        .detail-section { margin-top: 25px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #ddd; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .section-title { font-size: 1.1em; font-weight: bold; color: #007bff; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        /* 📋 [하단 상세 타임라인 섹션] */
+        .detail-section { 
+            margin-top: 28px; 
+            background: white; 
+            border-radius: 16px; 
+            padding: 24px; 
+            border: 1px solid #e5e7eb; 
+            display: none; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+        }
+        .section-title { font-size: 1.05em; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
         
-        .log-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 12px 16px; border-radius: 8px; background: #fafafa; margin-bottom: 10px; text-decoration: none; color: inherit; transition: all 0.2s; }
-        .log-card:hover { background: #f1f7ff; border-color: #007bff; }
+        /* 과거 상담 요약 개별 타임라인 카드 서식 */
+        .log-card { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid #f1f5f9; 
+            padding: 14px 18px; 
+            border-radius: 12px; 
+            background: #f8fafc; 
+            margin-bottom: 12px; 
+            text-decoration: none; 
+            color: inherit; 
+            transition: all 0.2s; 
+        }
+        .log-card:hover { 
+            background: #f5f7ff; 
+            border-color: #818cf8; 
+            transform: translateX(2px);
+        }
+        .log-card:last-child { margin-bottom: 0; }
         .log-meta { display: flex; align-items: center; gap: 8px; }
-        .badge { background: #e2e3e5; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
-        .log-title { font-size: 0.95em; color: #444; margin: 8px 0 0 0; }
+        .badge { 
+            background: #818cf8; 
+            color: white; 
+            padding: 3px 9px; 
+            border-radius: 6px; 
+            font-size: 0.8em; 
+            font-weight: 600; 
+        }
+        .log-title { font-size: 0.94em; color: #334155; margin: 10px 0 0 0; font-weight: 500; }
     </style>
 </head>
 <body>
 
-    <a href="{% url 'counseling_home' %}" class="back-link">← 메인 대시보드로 돌아가기</a>
+    <!-- ⬅️ [구역 1: 최상단 헤더 내비게이션 바] -->
+    <div class="back-link-box">
+        <a href="{% url 'counseling_home' %}" class="back-link">← 메인 대시보드로 돌아가기</a>
+    </div>
 
     <h1 class="calendar-title">📅 나의 감정체크 달력 일기장</h1>
-    
-    <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 20px; border: 1px solid #e9ecef; text-align: center; font-size: 0.9em; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-        <span style="margin: 0 8px;">🔥 불안/스트레스</span> | 
-        <span style="margin: 0 8px;">😭 우울/무기력</span> | 
-        <span style="margin: 0 8px;">⏱️ 조급/마감압박</span> | 
-        <span style="margin: 0 8px;">✨ 성장의지/성취</span> | 
-        <span style="margin: 0 8px;">🍀 마음안정/평온</span> |
-        <span style="margin: 0 8px;">😊 잔잔한 일상</span>
-    </div>
-    
     <p class="calendar-subtitle">날짜를 클릭하면 그날 AI 교수님과 나눈 심층 상담 히스토리를 다시 복원할 수 있습니다.</p>
     
+    <!-- 🏷️ [구역 2: 감정 지표 인덱스 안내 바] -->
+    <div class="emotion-legend-bar">
+        <span class="legend-chip">🔥 불안/스트레스</span>
+        <span class="legend-chip">😭 우울/무기력</span>
+        <span class="legend-chip">⏱️ 조급/마감압박</span>
+        <span class="legend-chip">✨ 성장의지/성취</span>
+        <span class="legend-chip">🍀 마음안정/평온</span>
+        <span class="legend-chip">😊 잔잔한 일상</span>
+    </div>
+    
+    <!-- 📅 [구역 3: 캘린더 그리드 렌더링 컨테이너] -->
     <div class="calendar-container">
         <div class="calendar-header">
             <div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div>
         </div>
 
         <div class="calendar-grid">
+            <!-- 백업/시작 더미 날짜 컴포넌트 -->
             <div class="day-box other-month"><span class="day-number">31</span></div>
         </div>
     </div>
 
+    <!-- 📋 [구역 4: 클릭 시 슬라이드 노출되는 세부 상담 기록 아카이브 피드] -->
     <div class="detail-section" id="detail-section">
         <h3 class="section-title" id="selected-date-title">📋 상담 히스토리 원본</h3>
-        <div id="logs-list-container">
-            </div>
+        <div id="logs-list-container"></div>
     </div>
 
+    <!-- ⚙️ [백엔드 데이터 홀더] 장고 컨텍스트 구조 변형 금지 특수 보안 구역 -->
     <div id="django-data-holder" style="display: none;">
         {% if calendar_data %}
             {% for date_key, value in calendar_data.items %}
@@ -102,10 +212,11 @@
         {% endif %}
     </div>
 
+    <!-- ⚙️ [스크립트 엔진: 기존 데이터 수집 및 그리드 빌더 로직 보존 코어] -->
     <script>
         const emoData = {};
         
-        // HTML에 안전하게 심어둔 장고 데이터를 순수 JS 문법으로 파싱하여 변환
+        // 장고 내장 루프 데이터 안전 바인딩 파트
         const dateItems = document.querySelectorAll('.backend-date-item');
         dateItems.forEach(function(item) {
             const dateKey = item.getAttribute('data-date');
@@ -179,20 +290,20 @@
                     card.href = '/counseling/detail/' + log.id + '/'; 
                     
                     card.innerHTML = `
-                        <div>
+                        <div style="max-width: 80%;">
                             <div class="log-meta">
-                                <span class="badge" style="background: #007bff; color: white;">${log.category}</span>
-                                <span style="font-size: 0.85em; color: #888;">⏱️ ${log.time} 상담</span>
+                                <span class="badge">${log.category}</span>
+                                <span style="font-size: 0.82em; color: #94a3b8; font-weight: 500;">⏱️ ${log.time} 상담</span>
                             </div>
                             <p class="log-title">${log.emoji} Q. ${log.title}</p>
                         </div>
-                        <div style="color: #007bff; font-weight: bold; font-size: 0.9em;">대화록 열기 →</div>
+                        <div style="color: #4f46e5; font-weight: 600; font-size: 0.88em; white-space: nowrap;">대화록 열기 →</div>
                     `;
                     container.appendChild(card);
                 });
             } else {
                 section.style.display = 'block';
-                container.innerHTML = '<p style="text-align: center; color: #999; margin: 20px 0; font-size: 0.9em;">이날 진행된 심층 상담 내역이 없습니다. 대시보드에서 교수님과 대화를 시작해 보세요!</p>';
+                container.innerHTML = '<p style="text-align: center; color: #94a3b8; margin: 24px 0; font-size: 0.9em; font-weight: 500;">이날 진행된 심층 상담 내역이 없습니다. 대시보드에서 교수님과 대화를 시작해 보세요!</p>';
             }
             
             section.scrollIntoView({ behavior: 'smooth' });

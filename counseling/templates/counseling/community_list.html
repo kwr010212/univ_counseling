@@ -2,89 +2,131 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>소통 커뮤니티 - 마음 대피소</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>univ counseling - 소통 커뮤니티 마음 대피소</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; background-color: #f4f6f9; color: #333; }
-        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .back-link { text-decoration: none; color: #007bff; font-weight: bold; }
-        .write-btn { background: #007bff; color: white; text-decoration: none; padding: 10px 18px; border-radius: 20px; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .write-btn:hover { background: #0056b3; }
-        
-        /* 🤖 AI 마음 분석 가이드 배너 */
-        .ai-guide-banner { 
-            background: #eef2ff; 
-            border: 1px solid #c7d2fe; 
-            border-left: 5px solid #4f46e5; 
-            border-radius: 8px; 
-            padding: 15px 18px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        /* 🎨 [글로벌 기본 스타일] 포근하고 가독성 높은 그레이-인디고 라인 연동 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            max-width: 680px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+            background-color: #f0f2f5; 
+            color: #334155; 
             line-height: 1.6;
-            font-size: 0.95em;
         }
-        .ai-guide-banner strong { color: #4f46e5; font-size: 1.05em; }
+
+        /* 🏠 [상단 상시 내비게이션 바] 대시보드 복귀 및 글쓰기 버튼 정렬 */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .back-link { 
+            font-size: 0.9em; 
+            color: #64748b; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: color 0.2s; 
+        }
+        .back-link:hover { color: #4f46e5; }
         
-       /* 🗂️ [복원 및 추가] 카테고리 필터링 탭 스타일 */
+        .write-btn { 
+            background: #818cf8; 
+            color: white; 
+            text-decoration: none; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 0.88em; 
+            box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.2); 
+            transition: all 0.2s;
+        }
+        .write-btn:hover { background: #6366f1; transform: translateY(-1px); }
+        
+        /* 🤖 [AI 마음 분석 가이드 배너] 인텔리전트 파스텔 라벤더 레이어 */
+        .ai-guide-banner { 
+            background: linear-gradient(135deg, #e0e7ff 0%, #f5f7ff 100%);
+            border: 1px solid #c7d2fe; 
+            border-left: 5px solid #6366f1; 
+            border-radius: 14px; 
+            padding: 18px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            font-size: 0.92em;
+            color: #3730a3;
+        }
+        .ai-guide-banner strong { color: #4f46e5; font-weight: 700; }
+        
+        /* 🗂️ [카테고리 필터링 탭 구역 서식] 호버/액티브 가이드 */
         .category-tabs { 
             display: flex; 
             align-items: center; 
             gap: 8px; 
-            margin-bottom: 25px; 
-            border-bottom: 2px solid #ddd; 
-            padding-bottom: 10px; 
-            flex-wrap: wrap; /* 화면이 좁아지면 자연스럽게 내려가도록 안전장치 */
+            margin-bottom: 24px; 
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 12px; 
+            flex-wrap: wrap; 
         }
         .tab-item { 
             text-decoration: none; 
-            color: #555; 
+            color: #64748b; 
             padding: 6px 14px; 
-            border-radius: 15px; 
-            background: #e9ecef; 
-            font-size: 0.9em; 
-            font-weight: bold; 
-            transition: all 0.2s; 
+            border-radius: 20px; 
+            background: #e2e8f0; 
+            font-size: 0.88em; 
+            font-weight: 600; 
+            transition: all 0.22s; 
         }
-        .tab-item:hover { background: #ced4da; color: #222; }
-        .tab-item.active { background: #4f46e5; color: white; } /* 현재 선택된 탭 활성화 */
+        .tab-item:hover { background: #cbd5e1; color: #334155; }
+        .tab-item.active { background: #818cf8; color: white; }
 
-        /* 💡 교수님 컴플레인 방지용 에브리타임 버튼 전용 스타일 */
+        /* 🚨 교수님 컨펌용 외부 광장 전용 버튼 (소프트 파스텔 레드 테마 적용) */
         .tab-everytime {
-            background: #fff0f0; 
-            color: #c62917; 
-            border: 1px solid #fdd; 
-            margin-left: auto; /* 우리 카테고리들과 완전히 분리해서 오른쪽 끝으로 밀기 */
+            background: #fef2f2; 
+            color: #ef4444; 
+            border: 1px solid #fca5a5; 
+            margin-left: auto; 
         }
         .tab-everytime:hover {
-            background: #fcc;
-            color: #a31e10;
+            background: #fee2e2;
+            color: #dc2626;
         }
         
-        /* 📋 게시글 카드 스타일 */
-        .post-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 15px; text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
-        .post-card:hover { transform: translateY(-2px); border-color: #4f46e5; }
-        .post-title { font-size: 1.15em; font-weight: bold; margin: 0 0 10px 0; color: #222; display: flex; align-items: center; gap: 8px; }
-        .post-excerpt { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* 📋 [게시글 카드 타임라인 피드 구역 스타일] */
+        .post-card { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 22px; 
+            border: 1px solid #e5e7eb; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+            margin-bottom: 16px; 
+            text-decoration: none; 
+            color: inherit; 
+            display: block; 
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .post-card:hover { transform: translateY(-2px); border-color: #818cf8; box-shadow: 0 10px 15px -3px rgba(129, 140, 248, 0.08); }
         
-        .post-meta { display: flex; justify-content: space-between; font-size: 0.82em; color: #888; }
-        .meta-left { display: flex; gap: 10px; align-items: center; }
+        .post-title { font-size: 1.12em; font-weight: 700; margin: 0 0 10px 0; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        .post-excerpt { font-size: 0.94em; color: #475569; line-height: 1.6; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         
-        /* 🏷️ 카테고리별 이쁜 태그 색상 정의 */
-        .category-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.78em; font-weight: bold; text-transform: uppercase; }
-        .cat-취업 { background-color: #ffe3e3; color: #e63946; }
-        .cat-진로 { background-color: #e3faf2; color: #0891b2; }
-        .cat-인간관계 { background-color: #fff3bf; color: #d97706; }
-        .cat-일반 { background-color: #f1f3f5; color: #495057; }
+        .post-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.84em; color: #94a3b8; font-weight: 500; }
+        .meta-left { display: flex; gap: 8px; align-items: center; }
+        
+        /* 🏷️ 카테고리별 아기자기하고 차분한 파스텔 뱃지 색상 컬렉션 */
+        .category-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.76em; font-weight: 700; }
+        .cat-취업 { background-color: #fee2e2; color: #ef4444; }
+        .cat-진로 { background-color: #ecfeff; color: #06b6d4; }
+        .cat-인간관계 { background-color: #fef9c3; color: #ca8a04; }
+        .cat-일반 { background-color: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body>
 
     <div class="nav-header">
-        <a href="{% url 'counseling_home' %}" class="back-link">← 대시보드로 돌아가기</a>
+        <a href="{% url 'counseling_home' %}" class="back-link">← 메인 대시보드로 돌아가기</a>
         <a href="{% url 'community_write' %}" class="write-btn">✏️ 고민 글쓰기</a>
     </div>
 
     <div class="ai-guide-banner">
-        🤖 <strong>AI 마음 분석 가이드:</strong> {{ request.user.username }}님의 최근 가장 깊은 고민 카테고리는 <strong style="color: #e63946;">'{{ user_deepest_category }}'</strong>인 것으로 분석되었습니다. 동일한 고민을 가진 학우들의 글을 읽으며 위로와 솔루션을 얻어보세요!
+        🤖 <strong>AI 마음 분석 가이드:</strong> {{ request.user.username }}님의 최근 가장 깊은 고민 카테고리는 <strong style="color: #ef4444;">'{{ user_deepest_category }}'</strong>인 것으로 분석되었습니다. 동일한 고민을 가진 학우들의 글을 읽으며 위로와 솔루션을 얻어보세요!
     </div>
 
     <div class="category-tabs">
@@ -94,7 +136,6 @@
         <a href="{% url 'community_list' %}?category=인간관계" class="tab-item {% if selected_category == '인간관계' %}active{% endif %}">인간관계</a>
         <a href="{% url 'community_list' %}?category=일반" class="tab-item {% if selected_category == '일반' %}active{% endif %}">일반</a>
         
-        <!-- 🔴 오른쪽 끝에 달라붙는 교수님 컨펌용 버튼 -->
         <a href="https://everytime.kr" target="_blank" class="tab-item tab-everytime">
             🔴 에브리타임 광장 ↗
         </a>
@@ -111,19 +152,20 @@
                 
                 <div class="post-meta">
                     <div class="meta-left">
-                        <span style="color: #555; font-weight: bold;">🤫 익명 학우</span>
-                        <span>|</span>
+                        <span style="color: #475569; font-weight: 600;">🤫 익명 학우</span>
+                        <span style="color: #e2e8f0;">|</span>
                         <span>📅 {{ post.created_at|date:"m/d H:i" }}</span>
                     </div>
                     <div>
-                        <span>💬 댓글 {{ post.comments.count }}</span>
+                        <span style="color: #818cf8; font-weight: 600;">💬 댓글 {{ post.comments.count }}</span>
                     </div>
                 </div>
             </a>
         {% endfor %}
     {% else %}
-        <div style="background: white; text-align: center; padding: 40px; border-radius: 12px; border: 1px solid #ddd; color: #999;">
-            현재 <strong>[{{ selected_category }}]</strong> 카테고리에 등록된 고민 글이 없습니다. 첫 번째 위로의 글을 작성해 보세요!
+        <div style="background: white; text-align: center; padding: 48px; border-radius: 16px; border: 1px solid #e5e7eb; color: #94a3b8; font-size: 0.92em;">
+            현재 <strong>[{{ selected_category }}]</strong> 카테고리에 등록된 고민 글이 없습니다.<br>
+            학우님들을 위한 첫 번째 따뜻한 위로의 글을 작성해 보세요!
         </div>
     {% endif %}
 

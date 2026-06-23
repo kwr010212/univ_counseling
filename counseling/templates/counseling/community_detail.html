@@ -2,54 +2,146 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>{{ post.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>univ counseling - {{ post.title }}</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f4f6f9; }
-        .post-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .post-header { border-bottom: 1px solid #edf2f7; padding-bottom: 12px; margin-bottom: 15px; }
-        .post-content { font-size: 1.1em; line-height: 1.7; color: #2d3748; min-height: 150px; white-space: pre-wrap; }
+        /* 🎨 [글로벌 기본 스타일] 파스텔 라벤더 블루 테마 연동 가이드 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            max-width: 680px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+            background-color: #f0f2f5; 
+            color: #334155; 
+            line-height: 1.6;
+        }
+
+        /* 🏠 [상단 내비게이션 바] 커뮤니티 목록 복귀 링크 */
+        .back-link-box { margin-bottom: 16px; }
+        .back-link { 
+            font-size: 0.9em; 
+            color: #64748b; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: color 0.2s; 
+        }
+        .back-link:hover { color: #4f46e5; }
         
-        /* 댓글 컴포넌트 */
-        .comment-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .comment-item { border-bottom: 1px solid #f7fafc; padding: 10px 0; font-size: 0.95em; }
-        .comment-meta { font-size: 0.8em; color: #a0aec0; margin-bottom: 4px; }
+        /* 📄 [고민 본문 메인 카드] 라운딩 및 부드러운 그림자 마감 */
+        .post-card { 
+            background: white; 
+            padding: 28px; 
+            border-radius: 16px; 
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+            margin-bottom: 20px; 
+        }
+        .post-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px; }
+        .post-title { font-size: 1.4em; font-weight: 700; color: #1e293b; margin: 12px 0 8px 0; }
+        .post-content { font-size: 1.02em; line-height: 1.75; color: #475569; min-height: 150px; white-space: pre-wrap; }
         
-        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e0; resize: none; margin-bottom: 10px; }
-        .submit-btn { background: #fd7e14; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .back-link { display: inline-block; margin-bottom: 15px; color: #4a5568; text-decoration: none; font-weight: bold; }
+        /* 💬 [하단 소통 댓글 컴포넌트 세션] */
+        .comment-section { 
+            background: white; 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+        }
+        .comment-section h3 { font-size: 1.1em; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 20px; }
+        
+        /* 개별 피드형 댓글 열 서식 */
+        .comment-item { border-bottom: 1px solid #f1f5f9; padding: 14px 4px; font-size: 0.94em; }
+        .comment-item:last-child { border-bottom: none; }
+        .comment-meta { font-size: 0.84em; color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
+        
+        /* ✍️ 댓글 작성용 텍스트에어리어 전용 스타일 */
+        textarea.form-control { 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 14px; 
+            border-radius: 10px; 
+            border: 1px solid #e5e7eb; 
+            font-size: 0.92em;
+            color: #334155;
+            background-color: #ffffff;
+            resize: none; 
+            margin-bottom: 12px; 
+            transition: all 0.2s;
+        }
+        textarea.form-control:focus { 
+            border-color: #818cf8; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+        }
+        
+        /* 🚀 [댓글 등록 버튼] 우측 정렬형 인디고 액션 단추 */
+        .submit-btn { 
+            background: #818cf8; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            font-size: 0.88em;
+            font-weight: 600; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.15);
+            transition: all 0.2s; 
+        }
+        .submit-btn:hover { background: #6366f1; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* 🏷️ 커뮤니티 리스트와 일치하는 파스텔 뱃지 스타일 가이드 */
+        .category-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.78em; font-weight: 700; display: inline-block; }
+        .cat-취업 { background-color: #fee2e2; color: #ef4444; }
+        .cat-진로 { background-color: #ecfeff; color: #06b6d4; }
+        .cat-인간관계 { background-color: #fef9c3; color: #ca8a04; }
+        .cat-일반 { background-color: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body>
 
-    <a href="{% url 'community_list' %}" class="back-link">← 목록으로 돌아가기</a>
+    <!-- 🏠 [구역 1: 최상단 백링크 내비게이션 바] -->
+    <div class="back-link-box">
+        <a href="{% url 'community_list' %}" class="back-link">← 고민 목록으로 돌아가기</a>
+    </div>
 
+    <!-- 📄 [구역 2: 고민 본문 디테일 뷰어 랩] -->
     <div class="post-card">
         <div class="post-header">
-            <span style="background: #edf2f7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">{{ post.category }}</span>
-            <h2 style="margin: 10px 0 5px 0;">{{ post.title }}</h2>
-            <div style="font-size: 0.85em; color: #a0aec0;">작성자: 익명 학우 | {{ post.created_at|date:"Y-m-d H:i" }}</div>
+            <!-- 동적 클래스 매핑 구조 연동 완료 -->
+            <span class="category-badge cat-{{ post.category }}">{{ post.category }}</span>
+            <h2 class="post-title">{{ post.title }}</h2>
+            <div style="font-size: 0.84em; color: #94a3b8; font-weight: 500;">🤫 익명 학우 | 📅 {{ post.created_at|date:"Y-m-d H:i" }}</div>
         </div>
         <div class="post-content">{{ post.content }}</div>
     </div>
 
+    <!-- 💬 [구역 3: 하단 학우 소통 아카이브 리스트 및 입력 피드 랩] -->
     <div class="comment-section">
         <h3>💬 댓글 ({{ post.comments.count }})</h3>
-        <div style="margin-bottom: 20px;">
+        
+        <!-- 등록된 댓글 루프 순환 레이어 -->
+        <div style="margin-bottom: 24px;">
             {% for comment in post.comments.all %}
-            <div class="comment-item">
-                <div class="comment-meta">익명 학우 | {{ comment.created_at|date:"m-d H:i" }}</div>
-                <div style="color: #4a5568;">{{ comment.content }}</div>
-            </div>
+                <div class="comment-item">
+                    <div class="comment-meta">🤫 익명 학우 <span style="color: #e2e8f0; margin: 0 4px;">|</span> {{ comment.created_at|date:"m-d H:i" }}</div>
+                    <div style="color: #475569; word-break: break-all;">{{ comment.content }}</div>
+                </div>
             {% empty %}
-            <div style="color: #a0aec0; text-align: center; padding: 15px;">아직 댓글이 없습니다. 따뜻한 한마디를 건네보세요.</div>
+                <!-- 빈 데이터 홀더 안내 가이드 바 -->
+                <div style="color: #94a3b8; text-align: center; padding: 32px 0; font-size: 0.9em; font-weight: 500;">
+                    아직 등록된 댓글이 없습니다.<br>힘들어하는 학우에게 따뜻한 위로의 한마디를 건네보세요. 🍀
+                </div>
             {% endfor %}
         </div>
 
+        <!-- 새 댓글 달기 전송 폼 파트 -->
         <form action="{% url 'community_comment' post.id %}" method="POST">
             {% csrf_token %}
-            <textarea name="content" rows="3" placeholder="타인을 비방하거나 상처를 주는 댓글은 삼가해 주세요." required></textarea>
+            <textarea name="content" rows="3" class="form-control" placeholder="타인을 비방하거나 상처를 주는 댓글은 삼가해 주세요. 따뜻한 에티켓이 좋은 마음 대피소를 만듭니다." required></textarea>
             <div style="text-align: right;">
-                <button type="submit" class="submit-btn">댓글 등록</button>
+                <button type="submit" class="submit-btn">댓글 등록하기</button>
             </div>
         </form>
     </div>

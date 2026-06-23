@@ -2,15 +2,130 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>로그인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>univ counseling - 로그인</title>
+    <style>
+        /* 🎨 [글로벌 기본 스타일] 프로젝트 공통 파스텔 톤 셋업 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            background-color: #f0f2f5; 
+            color: #334155; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 🔒 [로그인 컨테이너 카드] 크기를 컴팩트하게 잡아 안정감을 줌 */
+        .login-box { 
+            background: white; 
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px; 
+            padding: 36px 32px; 
+            border: 1px solid #e5e7eb; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .brand-title { 
+            text-align: center; 
+            margin-top: 0; 
+            margin-bottom: 8px; 
+            color: #4f46e5; 
+            font-weight: 800; 
+            font-size: 1.5em; 
+        }
+        .brand-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.88em;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+        
+        /* 입력 폼 그룹 스타일 */
+        .input-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-weight: 600; font-size: 0.9em; color: #475569; }
+        
+        .form-control { 
+            width: 100%; 
+            padding: 12px 14px; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 10px; 
+            font-size: 0.95em; 
+            color: #334155;
+            box-sizing: border-box; 
+            transition: all 0.2s;
+        }
+        .form-control:focus { 
+            border-color: #818cf8; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+        }
+        
+        /* 🚀 액션 버튼 */
+        .submit-btn { 
+            width: 100%; 
+            background: #818cf8; 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 12px; 
+            font-size: 0.98em; 
+            font-weight: 600; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.2);
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        .submit-btn:hover { background: #6366f1; }
+        
+        /* 🔗 하단 이동 링크 */
+        .switch-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.88em;
+            color: #64748b;
+        }
+        .switch-link a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .switch-link a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <h2>로그인</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">로그인</button>
-    </form>
-    <p>아직 회원이 아니신가요? <a href="{% url 'signup' %}">회원가입하기</a></p>
+
+    <div class="login-box">
+        <h3 class="brand-title">🌿 마음 대피소</h3>
+        <div class="brand-subtitle">대학 생활의 고민을 털어놓는 공간</div>
+        
+        <!-- 장고 로그인 처리 폼 연동 -->
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            
+            <div class="input-group">
+                <label for="username">아이디</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="아이디를 입력해 주세요" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="비밀번호를 입력해 주세요" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">로그인</button>
+        </form>
+        
+        <div class="switch-link">
+            아직 회원이 아니신가요? <a href="{% url 'signup' %}">회원가입 하기</a>
+        </div>
+    </div>
+
 </body>
 </html>

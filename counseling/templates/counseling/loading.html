@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>분석 중</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5; font-family: sans-serif; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #818cf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+    <h3>AI 상담 교수가 마음을 분석 중입니다...</h3>
+    <script>
+        // 2초(2000ms) 후 자동으로 결과 리포트 페이지로 이동
+        setTimeout(function() {
+            window.location.href = "{{ next_url }}";
+        }, 2000);
+    </script>
+</body>
+</html>

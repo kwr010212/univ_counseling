@@ -2,81 +2,283 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>대학생 고민 케어 시스템</title>
+    <viewport content="width=device-width, initial-scale=1.0">
+    <title>univ counseling</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
-        .section-box { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #fff; }
-        .category-container { display: flex; gap: 15px; margin-top: 15px; }
-        .category-card { flex: 1; border: 2px solid #007bff; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; text-decoration: none; color: #007bff; font-weight: bold; }
-        .category-card:hover { background: #007bff; color: #fff; }
-        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
-        button { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #0056b3; }
+        /* 🎨 [글로벌 기본 스타일] 전체 레이아웃 및 파스텔톤 가이드 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Malgun Gothic"; 
+            max-width: 760px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+            background-color: #f3f4f6; 
+            color: #334155; 
+            line-height: 1.6;
+        }
+
+        /* 🏠 [상단 네비게이션 헤더 바] 유저 정보 및 서비스 대문 구역 */
+        .header-bar {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+        .header-bar h2 { margin: 0; font-size: 1.35em; color: #4f46e5; font-weight: 700; }
+        .user-info { font-size: 0.9em; color: #475569; display: flex; align-items: center; gap: 8px; }
+        
+        /* 👤 [마이페이지 버튼] 상단 헤더 바 우측 마이페이지 바로가기 링크 */
+        .mypage-link {
+            font-size: 0.88em;
+            color: #4f46e5;
+            text-decoration: none;
+            border: 1px solid #e0e7ff;
+            background: #f8fafc;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .mypage-link:hover {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        /* 🚪 [로그아웃 버튼] 깔끔한 소프트 그레이 톤다운 */
+        .logout-btn { 
+            padding: 5px 10px; 
+            background: #94a3b8; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 0.85em; 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: #64748b; }
+
+        /* 🔮 [공통 섹션 박스] 컴팩트 카드 컨테이너 공중 부양 스타일 */
+        .section-box { 
+            background: white; 
+            padding: 24px; 
+            margin-bottom: 20px; 
+            border-radius: 16px; 
+            border: 1px solid #e5e7eb; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02), 0 4px 6px -2px rgba(0,0,0,0.01); 
+            position: relative;
+        }
+        .section-box h3 { margin-top: 0; margin-bottom: 8px; font-size: 1.15em; color: #1e293b; font-weight: 700; }
+        .section-desc { font-size: 0.88em; color: #64748b; margin-top: 0; margin-bottom: 18px; letter-spacing: -0.2px; }
+
+        /* 🔗 [섹션 인라인 우측 링크] 리스트 우측 상단 더보기 버튼 */
+        .section-right-link {
+            font-size: 0.85em;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+            position: absolute;
+            top: 26px;
+            right: 24px;
+        }
+        .section-right-link:hover { text-decoration: underline; }
+
+        /* 💡 [오늘의 명언 박스] 부드러운 라벤더 블루 포인트 */
+        .quote-box { 
+            background-color: #fbfbfe; 
+            border-left: 4px solid #818cf8; 
+            padding: 18px 20px;
+        }
+        .quote-content { font-style: italic; font-size: 1.05em; margin: 0 0 6px 0; color: #4f46e5; font-weight: 500; }
+        .quote-author { color: #94a3b8; font-size: 0.85em; }
+
+        /* 🎛️ [퀵 메뉴 컨테이너] 서비스 주요 카테고리 빠른 이동 버튼 구역 */
+        .quick-menu-container { margin-bottom: 20px; display: flex; gap: 12px; }
+        .menu-btn { 
+            flex: 1; 
+            text-align: center; 
+            color: white; 
+            text-decoration: none; 
+            padding: 14px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            font-size: 0.92em;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .menu-btn:hover { transform: translateY(-1px); opacity: 0.95; }
+        .btn-calendar { background: #34d399; } /* 감정 달력 */
+        .btn-community { background: #fb923c; } /* 고민 게시판 */
+        .btn-chat { background: #818cf8; } /* 고민맞춤 실시간채팅 */
+
+        /* ✍️ [자율상담 입력창] 텍스트 에어리어 서식 */
+        textarea { 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 14px; 
+            border-radius: 10px; 
+            border: 1px solid #e5e7eb; 
+            background: #f9fafb;
+            font-size: 0.92em;
+            color: #334155;
+            resize: none; 
+            transition: all 0.2s;
+        }
+        textarea:focus { outline: none; border-color: #818cf8; background: white; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12); }
+        
+        /* 🚀 [고민 털어놓기 버튼] 폼 전송용 액션 버튼 */
+        .submit-btn { 
+            background: #818cf8; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.92em;
+            box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.2);
+            transition: all 0.2s; 
+        }
+        .submit-btn:hover { background: #6366f1; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* 🔍 [분야상담 카드 레이아웃] 카테고리별 분할 카드 구성 */
+        .category-container { display: flex; gap: 12px; margin-top: 15px; }
+        .category-card { 
+            flex: 1; 
+            background: #fbfbfe;
+            border: 1px solid #e0e7ff; 
+            padding: 16px; 
+            border-radius: 12px; 
+            text-align: center; 
+            cursor: pointer; 
+            text-decoration: none; 
+            color: #6366f1; 
+            font-weight: 600; 
+            font-size: 0.95em;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .category-card:hover { background: #818cf8; color: white; border-color: #818cf8; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(129, 140, 248, 0.15); }
+
+        /* 📋 [대화 목록 리스트 구역] 과거 상담 내역 피드 */
+        .log-container { display: flex; flex-direction: column; gap: 10px; }
+        .log-item-link { text-decoration: none; color: inherit; }
+        .log-card { 
+            border: 1px solid #e5e7eb; 
+            padding: 14px 16px; 
+            border-radius: 10px; 
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+        .log-card:hover { background: white; border-color: #818cf8; transform: translateX(2px); }
+        
+        /* 🏷️ [로그별 카테고리 배지] AI 예측 분류 태그 */
+        .badge-category { 
+            background: #e0e7ff; 
+            color: #4f46e5;
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 0.8em; 
+            font-weight: 600; 
+        }
+        .log-time { color: #94a3b8; float: right; font-size: 0.82em; margin-top: 2px; }
+        .log-question { 
+            margin: 10px 0 0 0; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            font-size: 0.92em; 
+            color: #475569; 
+        }
+        .no-data { color: #94a3b8; font-size: 0.9em; text-align: center; padding: 20px 0; }
     </style>
 </head>
 <body>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>🎓 대학생 고민 케어 시스템</h2>
-        <div>
-            <strong>{{ user.username }}</strong>님 환영합니다 | 
-            <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="padding: 5px 10px; background:#6c757d;">로그아웃</button></form>
+    <div class="header-bar">
+        <h2>🌿 대학생 고민 플랫폼</h2>
+        <div class="user-info">
+            <strong>{{ user.username }}</strong>학우님 환영합니다
+            <span style="color:#cbd5e1;">|</span>
+            <a href="{% url 'my_page' %}" class="mypage-link">마이페이지</a>
+            <span style="color:#cbd5e1;">|</span>
+            <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">로그아웃</button>
+            </form>
         </div>
-        <a href="{% url 'emotion_calendar' %}" style="display: inline-block; background: #28a745; color: white; text-decoration: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; margin-bottom: 15px;">📅 나의 감정체크 달력 일기장 가기</a>
     </div>
 
-    <div class="section-box" style="background-color: #f8f9fa; border-left: 5px solid #007bff;">
-        <h4>💡 오늘의 마음 케어 명언</h4>
+    <div class="section-box quote-box">
+        <h4 style="margin: 0 0 8px 0; font-size: 0.85em; color: #64748b; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">💡 오늘의 마음 케어 명언</h4>
         {% if quote %}
-            <p style="font-style: italic; font-size: 1.1em; margin-bottom: 5px;">"{{ quote.content }}"</p>
-            <small style="color: #666;">- {{ quote.author }} -</small>
+            <p class="quote-content">"{{ quote.content }}"</p>
+            <span class="quote-author">- {{ quote.author }} -</span>
         {% else %}
-            <p style="font-style: italic;">"가장 빛나는 별은 아직 태어나지 않았다."</p>
+            <p class="quote-content">"가장 빛나는 별은 아직 태어나지 않았다."</p>
         {% endif %}
     </div>
 
-    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-        <a href="{% url 'emotion_calendar' %}" style="flex: 1; text-align: center; background: #28a745; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">📅 감정체크 달력 일기장</a>
-        <a href="{% url 'community_list' %}" style="flex: 1; text-align: center; background: #fd7e14; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">👥 학우 공감 커뮤니티 게시판</a>
-        <a href="{% url 'matching_chat' %}" style="flex: 1; text-align: center; background: #e83e8c; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">💬 AI 맞춤형 실시간 채팅방</a>
+    {% if request.user.is_authenticated and request.user.school %}
+    <div style="margin-bottom: 24px;">
+        {% if request.user.school == "서울대학교" %}
+            <a href="https://www.snu.ac.kr" target="_blank" class="school-btn" style="background: #1e3a8a; color: white; padding: 10px 16px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.88em; display: inline-block; box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.15);">🏫 서울대학교 바로가기 ↗</a>
+        {% elif request.user.school == "연세대학교" %}
+            <a href="https://www.yonsei.ac.kr" target="_blank" class="school-btn" style="background: #002060; color: white; padding: 10px 16px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.88em; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 32, 96, 0.15);">🏫 연세대학교 바로가기 ↗</a>
+        {% elif request.user.school == "고려대학교" %}
+            <a href="https://www.korea.ac.kr" target="_blank" class="school-btn" style="background: #86112e; color: white; padding: 10px 16px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.88em; display: inline-block; box-shadow: 0 4px 6px -1px rgba(134, 17, 46, 0.15);">🏫 고려대학교 바로가기 ↗</a>
+        {% else %}
+            <!-- 드롭다운에서 '기타'를 골랐거나 텍스트로 다른 학교가 입력된 경우 네이버 검색창으로 센스있게 연결 -->
+            <a href="https://search.naver.com/search.naver?query={{ request.user.school }}" target="_blank" class="school-btn" style="background: #818cf8; color: white; padding: 10px 16px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.88em; display: inline-block; box-shadow: 0 4px 6px -1px rgba(129, 140, 248, 0.15);">🏫 {{ request.user.school }} 바로가기 ↗</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="quick-menu-container">
+        <a href="{% url 'emotion_calendar' %}" class="menu-btn btn-calendar">📅 감정 달력</a>
+        <a href="{% url 'community_list' %}" class="menu-btn btn-community">👥 고민 게시판</a>
+        <a href="{% url 'matching_chat' %}" class="menu-btn btn-chat">💬 고민맞춤 실시간채팅</a>
     </div>
 
     <div class="section-box">
-        <h3>✍️ 지금 어떤 고민이 있으신가요?</h3>
-        <p style="font-size: 0.9em; color: #666;">카테고리를 고르지 않아도 괜찮습니다. 마음속 이야기를 적어주시면 자체 ML 엔진이 자동으로 분석합니다.</p>
+        <h3>✍️ 지금 어떤 고민이 있으신가요? (자율상담)</h3>
+        <p class="section-desc">카테고리를 고르지 않아도 괜찮습니다. 마음속 이야기를 적어주시면 자체 AI 엔진이 자동으로 분석하여 상담방을 열어드립니다.</p>
         
         <form action="{% url 'process_counseling' %}" method="POST">
             {% csrf_token %}
             <input type="hidden" name="question_id" value="free">
             <textarea name="user_answer" rows="5" placeholder="취업, 학점, 인간관계 등 지금 겪고 있는 답답한 상황을 편하게 적어주세요..." required></textarea>
-            <br><br>
-            <div style="text-align: right;">
-                <button type="submit">고민 털어놓기 (상담방 입장) 🚀</button>
+            <div style="text-align: right; margin-top: 14px;">
+                <button type="submit" class="submit-btn">고민 털어놓기 (상담방 입장) 🚀</button>
             </div>
         </form>
     </div>
 
     <div class="section-box">
-        <h3>🔍 분야별 집중 상담방</h3>
-        <p style="font-size: 0.9em; color: #666;">특정 주제를 선택하여 시스템이 제안하는 질문을 기반으로 심층 상담을 나눕니다.</p>
+        <h3>🔍 분야별 집중 상담 (분야상담)</h3>
+        <p class="section-desc">특정 주제를 선택하여 시스템이 제안하는 핵심 밸런싱 질문을 기반으로 깊이 있는 맞춤 심층 상담을 나눕니다.</p>
         
         <div class="category-container">
-            <a href="{% url 'category_counseling' '취업' %}" class="category-card">💼 취업 고민방</a>
-            <a href="{% url 'category_counseling' '진로' %}" class="category-card">🧭 진로/학업 고민방</a>
-            <a href="{% url 'category_counseling' '인간관계' %}" class="category-card">👥 인간관계 고민방</a>
+            <a href="{% url 'category_counseling' '취업' %}?category=취업" class="category-card">💼 취업</a>
+<a href="{% url 'category_counseling' '진로' %}?category=진로" class="category-card">🧭 진로/학업</a>
+<a href="{% url 'category_counseling' '인간관계' %}?category=인간관계" class="category-card">👥 인간관계</a>
         </div>
     </div>
 
-    <div class="section-box" style="border: none; padding: 0;">
-        <h3>📋 나의 지난 상담 대화 목록</h3>
+    <div class="section-box" style="border: none; padding: 0; background: transparent; box-shadow: none;">
+        <h3 style="font-size: 1.1em; margin-bottom: 12px;">📋 나의 대화 목록</h3>
+        
         {% if user_logs %}
-            <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="log-container">
                 {% for log in user_logs %}
-                    <a href="{% url 'counseling_detail' log.id %}" style="text-decoration: none; color: inherit;">
-                        <div style="border: 1px solid #eee; padding: 12px; border-radius: 6px; background: #fafafa;">
-                            <span style="background: #e2e3e5; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">{{ log.predicted_category }}</span>
-                            <small style="color: #999; float: right;">{{ log.created_at|date:"Y-m-d H:i" }}</small>
-                            <p style="margin: 8px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; color: #555;">
+                    <a href="{% url 'counseling_detail' log.id %}" class="log-item-link">
+                        <div class="log-card">
+                            <span class="badge-category">{{ log.predicted_category }}</span>
+                            <small class="log-time">{{ log.created_at|date:"Y-m-d H:i" }}</small>
+                            <p class="log-question">
                                 Q. {{ log.chosen_question }}
                             </p>
                         </div>
@@ -84,7 +286,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p style="color: #999; font-size: 0.9em;">아직 개설된 상담방이 없습니다.</p>
+            <p class="no-data">아직 개설된 상담방 기록이 없습니다.</p>
         {% endif %}
     </div>
 
